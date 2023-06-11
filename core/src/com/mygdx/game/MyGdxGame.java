@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -30,7 +33,8 @@ public class MyGdxGame extends Game implements InputProcessor {
 	Sprite obj;
 	OrthographicCamera camera;
 	Viewport viewport;
-	
+
+
 	@Override
 	public void create () {
 
@@ -45,6 +49,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 		manager.load("Sprite1/Run.png", Texture.class);
 		manager.load("Sprite1/Jump.png", Texture.class);
 		manager.load("Lost City Cover.jpeg", Texture.class);
+		manager.load("Sprite1/Fall.png", Texture.class);
 
 //		asset buat player 2
 		manager.load("Sprite2/Attack1.png", Texture.class);
@@ -53,6 +58,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 		manager.load("Sprite2/Idle.png", Texture.class);
 		manager.load("Sprite2/Run.png", Texture.class);
 		manager.load("Sprite2/Jump.png", Texture.class);
+		manager.load("Sprite2/Fall.png", Texture.class);
 
 		manager.finishLoading();
 		img = manager.get("Lost City Cover.jpeg");
@@ -83,6 +89,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 		p2.setX(1000-100);
 		p2.setY(140);
 		Gdx.input.setInputProcessor(this);
+
 
 
 
@@ -121,34 +128,37 @@ public class MyGdxGame extends Game implements InputProcessor {
 	public void update () {
 		p1.update();
 		p2.update();
+		if (p1.canHit(p2)) {
+			p2.setHP(p2.getHP()-p1.getDmg());
+		}
 	}
 
 
 	@Override
 	public boolean keyDown(int keycode) {
-		if (keycode == Input.Keys.UP) {
-			p1.setMove(Player.Direction.JUMP);
+		if (keycode == Input.Keys.W) {
+			p1.Jump(Player.State.JUMP);
 		}
-		if (keycode == Input.Keys.RIGHT){
+		if (keycode == Input.Keys.D){
 			p1.setMove(Player.Direction.RIGHT);
 		}
-		if (keycode == Input.Keys.LEFT) {
+		if (keycode == Input.Keys.A) {
 			p1.setMove(Player.Direction.LEFT);
 		}
-		if (keycode == Input.Keys.CONTROL_RIGHT) {
+		if (keycode == Input.Keys.CONTROL_LEFT) {
 			p1.Attack(Player.Action.ATTACK);
 		}
 
 		if (keycode == Input.Keys.UP) {
-			p2.setMove(Player2.Direction.JUMP);
+			p2.Jump(Player2.State.JUMP);
 		}
-		if (keycode == Input.Keys.D){
+		if (keycode == Input.Keys.RIGHT){
 			p2.setMove(Player2.Direction.RIGHT);
 		}
-		if (keycode == Input.Keys.A) {
+		if (keycode == Input.Keys.LEFT) {
 			p2.setMove(Player2.Direction.LEFT);
 		}
-		if (keycode == Input.Keys.CONTROL_LEFT) {
+		if (keycode == Input.Keys.CONTROL_RIGHT) {
 			p2.Attack(Player2.Action.ATTACK);
 		}
 
@@ -157,22 +167,20 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 	@Override
 	public boolean keyUp(int keycode) {
-		if(keycode == Input.Keys.LEFT && p1.getDirection() == Player.Direction.LEFT)
+		if(keycode == Input.Keys.A && p1.getDirection() == Player.Direction.LEFT)
 			p1.Stop();
-		else if(keycode == Input.Keys.RIGHT && p1.getDirection() == Player.Direction.RIGHT)
+		else if(keycode == Input.Keys.D && p1.getDirection() == Player.Direction.RIGHT)
 			p1.Stop();
-		else if(keycode == Input.Keys.UP && p1.getDirection() == Player.Direction.JUMP)
-			p1.Stop();
+		else if(keycode == Input.Keys.W && p1.getState() == Player.State.JUMP)
+			p1.Jump(Player.State.FALL);
 		p1.Attack(Player.Action.NO_ATTACK);
 
-
-
-		if(keycode == Input.Keys.A && p2.getDirection() == Player2.Direction.LEFT)
+		if(keycode == Input.Keys.LEFT && p2.getDirection() == Player2.Direction.LEFT)
 			p2.Stop();
-		else if(keycode == Input.Keys.D && p2.getDirection() == Player2.Direction.RIGHT)
+		else if(keycode == Input.Keys.RIGHT && p2.getDirection() == Player2.Direction.RIGHT)
 			p2.Stop();
-		else if(keycode == Input.Keys.W && p2.getDirection() == Player2.Direction.JUMP)
-			p2.Stop();
+		else if(keycode == Input.Keys.UP && p2.getState() == Player2.State.JUMP)
+			p2.Jump(Player2.State.FALL);
 		p2.Attack(Player2.Action.NO_ATTACK);
 		return true;
 	}

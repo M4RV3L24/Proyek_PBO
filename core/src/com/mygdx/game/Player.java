@@ -26,21 +26,24 @@ public class Player {
 
     enum State {
         IDLE,
-        RUN
+        RUN,
+        JUMP,
+        FALL
     }
     enum Direction {
         LEFT,
-        RIGHT,
-        JUMP
+        RIGHT
     }
 
     enum Action {
         ATTACK,
-        NO_ATTACK
+        NO_ATTACK,
     }
 
+
+
     Animation<TextureRegion> idleLeftAnimation, runLeftAnimation, idleRightAnimation, runRightAnimation, runRightJump, runLeftJump, runRightAttack, runLeftAttack,
-            runRightDeath, runLeftDeath, runRightHitted, runLeftHitted;
+            runRightDeath, runLeftDeath, runRightHitted, runLeftHitted, runLeftFall, runRightFall;
 
 
 
@@ -56,6 +59,7 @@ public class Player {
         Texture jump = assetManager.get("Sprite1/Jump.png");
         Texture death = assetManager.get("Sprite1/Death.png");
         Texture hitted = assetManager.get("Sprite1/Take Hit - white silhouette.png");
+        Texture fall = assetManager.get("Sprite1/Fall.png");
 
         //membuat animasi diam hadap kanan
         TextureRegion[] frames = MyGdxGame.CreateAnimationFrames(idle, idle.getWidth()/8, idle.getHeight(), 8, false, false);
@@ -101,10 +105,15 @@ public class Player {
         frames = MyGdxGame.CreateAnimationFrames(hitted, hitted.getWidth()/4, hitted.getHeight(), 4, false, false);
         runRightHitted = new Animation<TextureRegion>(0.09f, frames);
 
-
         //kena hit dari kiri
         frames = MyGdxGame.CreateAnimationFrames(hitted, hitted.getWidth()/4, hitted.getHeight(), 4, true, false);
         runLeftHitted= new Animation<TextureRegion>(0.09f, frames);
+
+        frames = MyGdxGame.CreateAnimationFrames(fall, fall.getWidth()/2, fall.getHeight(), 2, false, false);
+        runRightFall = new Animation<TextureRegion>(0.09f, frames);
+
+        frames = MyGdxGame.CreateAnimationFrames(fall, fall.getWidth()/2, fall.getHeight(), 2, true, false);
+        runLeftFall = new Animation<TextureRegion>(0.09f, frames);
     }
 
     public void draw(SpriteBatch batch)
@@ -124,7 +133,26 @@ public class Player {
         else if ((state == State.IDLE || state == State.RUN) && animationDirection == Direction.LEFT && act == Action.ATTACK){
             currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
         }
+        else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
+            currentFrame = runRightJump.getKeyFrame(stateTime, true);
+        }
+        else if (state == State.FALL && animationDirection == Direction.RIGHT) {
+            currentFrame = runRightFall.getKeyFrame(stateTime, true);
+        }
+        else if (state == State.JUMP && animationDirection == Direction.LEFT) {
+            currentFrame = runLeftJump.getKeyFrame(stateTime, true);
+        }
+        else if (state == State.FALL && animationDirection == Direction.LEFT) {
+            currentFrame = runLeftFall.getKeyFrame(stateTime, true);
+        }
 
+        if (HP == 0) {
+            if (animationDirection == Direction.LEFT) {
+                currentFrame = runLeftDeath.getKeyFrame(stateTime, false);
+            } else if (animationDirection == Direction.RIGHT) {
+                currentFrame = runRightDeath.getKeyFrame(stateTime, false);
+            }
+        }
         batch.draw(currentFrame, x-100, y-100);
     }
 
@@ -145,17 +173,28 @@ public class Player {
             this.Stop();
         }
 
-//        y += dy * speed * elapsed;
-//        if(y > MyGdxGame.WORLD_HEIGHT-20)
-//        {
-//            y = MyGdxGame.WORLD_HEIGHT-20;
-//            this.Stop();
-//        }
-//        else if(y < 20)
-//        {
-//            y = 20;
-//            this.Stop();
-//        }
+
+        y += dy * speed * elapsed;
+        if(y > 200+100)
+        {
+            y = 300;
+            dy = -1;
+            this.Jump(State.FALL);
+        }
+        else if(y < 140)
+        {
+            y = 140;
+            this.Stop();
+        }
+
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 
     public void setMove(Direction d)
@@ -197,6 +236,17 @@ public class Player {
         }
         else if (a == Action.ATTACK && act == Action.NO_ATTACK) {
             act = a;
+        }
+    }
+
+    void Jump (State s){
+        if (state == State.IDLE && s == State.JUMP) {
+            state = State.JUMP;
+            dy = 1;
+        }
+        if (state == State.JUMP && s == State.FALL) {
+            state = State.FALL;
+            dy = -1;
         }
     }
 
@@ -273,5 +323,22 @@ public class Player {
 
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public Action getAct() {
+        return act;
+    }
+
+    public boolean canHit (Player2 p2) {
+        if (act == Action.NO_ATTACK) {
+            return false;
+        }
+        float jarak = 0;
+        if (animationDirection == Direction.RIGHT) {
+            jarak = p2.getX() - x;
+        } else if (animationDirection == Direction.LEFT) {
+            jarak = x - p2.getX();
+        }
+        return jarak <= 50;
     }
 }

@@ -26,12 +26,13 @@ public class Player2 {
 
     enum State {
         IDLE,
-        RUN
+        RUN,
+        JUMP,
+        FALL
     }
     enum Direction {
         LEFT,
-        RIGHT,
-        JUMP
+        RIGHT
     }
 
     enum Action {
@@ -40,9 +41,11 @@ public class Player2 {
     }
 
     Animation<TextureRegion> idleLeftAnimation, runLeftAnimation, idleRightAnimation, runRightAnimation, runRightJump, runLeftJump, runRightAttack, runLeftAttack,
-            runRightDeath, runLeftDeath, runRightHitted, runLeftHitted;
+            runRightDeath, runLeftDeath, runRightHitted, runLeftHitted, runRightFall, runLeftFall;
 
-
+    void minusHP (int dmg) {
+        HP-=dmg;
+    }
 
 
     public void generatePlayerAnimation()
@@ -56,6 +59,7 @@ public class Player2 {
         Texture jump = assetManager.get("Sprite2/Jump.png");
         Texture death = assetManager.get("Sprite2/Death.png");
         Texture hitted = assetManager.get("Sprite2/Take Hit.png");
+        Texture fall = assetManager.get("Sprite2/Fall.png");
 
         //membuat animasi diam hadap kanan
         TextureRegion[] frames = MyGdxGame.CreateAnimationFrames(idle, idle.getWidth()/4, idle.getHeight(), 4, false, false);
@@ -105,6 +109,13 @@ public class Player2 {
         //kena hit dari kiri
         frames = MyGdxGame.CreateAnimationFrames(hitted, hitted.getWidth()/3, hitted.getHeight(), 3, true, false);
         runLeftHitted= new Animation<TextureRegion>(0.09f, frames);
+
+
+        frames = MyGdxGame.CreateAnimationFrames(fall, fall.getWidth()/2, fall.getHeight(), 2, false, false);
+        runRightFall = new Animation<TextureRegion>(0.09f, frames);
+
+        frames = MyGdxGame.CreateAnimationFrames(fall, fall.getWidth()/2, fall.getHeight(), 2, true, false);
+        runLeftFall = new Animation<TextureRegion>(0.09f, frames);
     }
 
     public void draw(SpriteBatch batch)
@@ -124,6 +135,20 @@ public class Player2 {
         else if ((state == State.IDLE || state == State.RUN) && animationDirection == Direction.LEFT && act == Action.ATTACK){
             currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
         }
+
+        else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
+            currentFrame = runRightJump.getKeyFrame(stateTime, true);
+        }
+        else if (state == State.FALL && animationDirection == Direction.RIGHT) {
+            currentFrame = runRightFall.getKeyFrame(stateTime, true);
+        }
+        else if ((state == State.JUMP) && animationDirection == Direction.LEFT) {
+            currentFrame = runLeftJump.getKeyFrame(stateTime, true);
+        }
+        else if (state == State.FALL && animationDirection == Direction.LEFT) {
+            currentFrame = runLeftFall.getKeyFrame(stateTime, true);
+        }
+
 
 
 
@@ -148,17 +173,30 @@ public class Player2 {
             this.Stop();
         }
 
-//        y += dy * speed * elapsed;
-//        if(y > MyGdxGame.WORLD_HEIGHT-20)
-//        {
-//            y = MyGdxGame.WORLD_HEIGHT-20;
-//            this.Stop();
-//        }
-//        else if(y < 20)
-//        {
-//            y = 20;
-//            this.Stop();
-//        }
+
+        y += dy * speed * elapsed;
+        if(y > 200+100)
+        {
+            y = 300;
+            dy = -1;
+            this.Jump(State.FALL);
+        }
+        else if(y < 140)
+        {
+            y = 140;
+            this.Stop();
+        }
+    }
+
+    void Jump (State s){
+        if (state == State.IDLE && s == State.JUMP) {
+            state = State.JUMP;
+            dy = 1;
+        }
+        if (state == State.JUMP && s == State.FALL) {
+            state = State.FALL;
+            dy = -1;
+        }
     }
 
     public void setMove(Direction d)
@@ -276,5 +314,13 @@ public class Player2 {
 
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 }
