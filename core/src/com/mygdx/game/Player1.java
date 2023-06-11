@@ -7,13 +7,13 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class Player {
-    public Player() {
+public class Player1{
+    public Player1() {
         this.generatePlayerAnimation();
     }
 
-    int HP = 100;
-    int dmg = 5;
+    Double HP = 100.0;
+    double dmg = 0.05;
 
     float stateTime = 0.0f;
     float x, y;
@@ -261,15 +261,16 @@ public class Player {
     }
 
 
-    public int getHP() {
+    public Double getHP() {
         return HP;
     }
 
-    public void setHP(int HP) {
+    public void setHP(Double HP) {
         this.HP = HP;
+        if (this.HP < 0) this.HP = 0.0;
     }
 
-    public int getDmg() {
+    public Double getDmg() {
         return dmg;
     }
 
@@ -339,6 +340,6 @@ public class Player {
         } else if (animationDirection == Direction.LEFT) {
             jarak = x - p2.getX();
         }
-        return jarak <= 50;
+        return jarak <= 100 && jarak > 50 && p2.getY() - y == 0;
     }
 }

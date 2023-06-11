@@ -2,20 +2,17 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.FileHandleResolver;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class MyGdxGame extends Game implements InputProcessor {
@@ -28,18 +25,41 @@ public class MyGdxGame extends Game implements InputProcessor {
 	AssetManager manager = new AssetManager();
 	SpriteBatch batch;
 	Texture img;
-	Player p1;
+	Player1 p1;
 	Player2 p2;
 	Sprite obj;
 	OrthographicCamera camera;
 	Viewport viewport;
+	BitmapFont font;
+	BitmapFontCache fontcache1, fontcache2;
 
 
 	@Override
 	public void create () {
-
-
 		batch = new SpriteBatch();
+		FileHandleResolver resolver = new InternalFileHandleResolver();
+		manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
+		manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
+
+		FreetypeFontLoader.FreeTypeFontLoaderParameter fontParameter = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
+		fontParameter.fontFileName = "04b_25__.ttf";
+		fontParameter.fontParameters.size = 24;
+		fontParameter.fontParameters.color = Color.WHITE;
+		fontParameter.fontParameters.borderColor = Color.BLACK;
+		fontParameter.fontParameters.borderWidth = 2;
+		fontParameter.fontParameters.flip = false;
+		manager.load("04b_25__.ttf", BitmapFont.class, fontParameter);
+
+//		FreetypeFontLoader.FreeTypeFontLoaderParameter bigfontParameter = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
+//		bigfontParameter.fontFileName = "04b_25__.ttf";
+//		bigfontParameter.fontParameters.size = 48;
+//		bigfontParameter.fontParameters.color = Color.WHITE;
+//		bigfontParameter.fontParameters.borderColor = Color.BLACK;
+//		bigfontParameter.fontParameters.borderWidth = 2;
+//		bigfontParameter.fontParameters.flip = false;
+//		manager.load("04b_25__.ttf", BitmapFont.class, bigfontParameter);
+
+
 
 //		asset buat player 1
 		manager.load("Sprite1/Attack1.png", Texture.class);
@@ -61,18 +81,24 @@ public class MyGdxGame extends Game implements InputProcessor {
 		manager.load("Sprite2/Fall.png", Texture.class);
 
 		manager.finishLoading();
+		font = manager.get("04b_25__.ttf");
+		fontcache1 = new BitmapFontCache(font);
+		fontcache2 = new BitmapFontCache(font);
+
+
+		fontcache1.setText("Player 1 HP: 100", 100, 600);
+		fontcache2.setText("Player 2 HP: 100", 670, 600);
+
 		img = manager.get("Lost City Cover.jpeg");
 		obj = new Sprite(img);
 		obj.setSize(WORLD_WIDTH, WORLD_HEIGHT);
 		obj.setPosition(0, 0);
-		float aspect_ratio = (float )Gdx.graphics.getWidth()/Gdx.graphics.getHeight();
+
 		camera = new OrthographicCamera(WORLD_WIDTH, WORLD_HEIGHT);
 		camera.setToOrtho(false, WORLD_WIDTH, WORLD_HEIGHT);
 		viewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),camera);
 
 //		obj.flip(false, true);
-
-
 //		Texture img = manager.get("Idle.png");
 //		obj = new Sprite(img);
 //		obj.flip(false, true);
@@ -80,7 +106,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 
 
-		p1 = new Player();
+		p1 = new Player1();
 		p1.setX(100);
 		p1.setY(140);
 
@@ -111,6 +137,8 @@ public class MyGdxGame extends Game implements InputProcessor {
 		obj.draw(batch);
 		p2.draw(batch);
 		p1.draw(batch);
+		fontcache1.draw(batch);
+		fontcache2.draw(batch);
 
 		batch.end();
 		this.update();
@@ -130,6 +158,11 @@ public class MyGdxGame extends Game implements InputProcessor {
 		p2.update();
 		if (p1.canHit(p2)) {
 			p2.setHP(p2.getHP()-p1.getDmg());
+			fontcache2.setText(String.format("Player 2 HP: %.2f",p2.getHP()), 670, 600);
+		}
+		if (p2.canHit(p1)) {
+			p1.setHP(p1.getHP()-p2.getDmg());
+			fontcache1.setText(String.format("Player 1 HP: %.2f",p1.getHP()), 100, 600);
 		}
 	}
 
@@ -137,16 +170,16 @@ public class MyGdxGame extends Game implements InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		if (keycode == Input.Keys.W) {
-			p1.Jump(Player.State.JUMP);
+			p1.Jump(Player1.State.JUMP);
 		}
 		if (keycode == Input.Keys.D){
-			p1.setMove(Player.Direction.RIGHT);
+			p1.setMove(Player1.Direction.RIGHT);
 		}
 		if (keycode == Input.Keys.A) {
-			p1.setMove(Player.Direction.LEFT);
+			p1.setMove(Player1.Direction.LEFT);
 		}
 		if (keycode == Input.Keys.CONTROL_LEFT) {
-			p1.Attack(Player.Action.ATTACK);
+			p1.Attack(Player1.Action.ATTACK);
 		}
 
 		if (keycode == Input.Keys.UP) {
@@ -167,13 +200,13 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 	@Override
 	public boolean keyUp(int keycode) {
-		if(keycode == Input.Keys.A && p1.getDirection() == Player.Direction.LEFT)
+		if(keycode == Input.Keys.A && p1.getDirection() == Player1.Direction.LEFT)
 			p1.Stop();
-		else if(keycode == Input.Keys.D && p1.getDirection() == Player.Direction.RIGHT)
+		else if(keycode == Input.Keys.D && p1.getDirection() == Player1.Direction.RIGHT)
 			p1.Stop();
-		else if(keycode == Input.Keys.W && p1.getState() == Player.State.JUMP)
-			p1.Jump(Player.State.FALL);
-		p1.Attack(Player.Action.NO_ATTACK);
+		else if(keycode == Input.Keys.W && p1.getState() == Player1.State.JUMP)
+			p1.Jump(Player1.State.FALL);
+		p1.Attack(Player1.Action.NO_ATTACK);
 
 		if(keycode == Input.Keys.LEFT && p2.getDirection() == Player2.Direction.LEFT)
 			p2.Stop();

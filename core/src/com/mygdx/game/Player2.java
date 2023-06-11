@@ -7,13 +7,13 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class Player2 {
+public class Player2{
     public Player2() {
         this.generatePlayerAnimation();
     }
 
-    int HP = 100;
-    int dmg = 5;
+    Double HP = 100.0;
+    Double dmg = 0.05;
 
     float stateTime = 0.0f;
     float x, y;
@@ -149,9 +149,13 @@ public class Player2 {
             currentFrame = runLeftFall.getKeyFrame(stateTime, true);
         }
 
-
-
-
+        if (HP == 0) {
+            if (animationDirection == Direction.LEFT) {
+                currentFrame = runLeftDeath.getKeyFrame(stateTime, false);
+            } else if (animationDirection == Direction.RIGHT) {
+                currentFrame = runRightDeath.getKeyFrame(stateTime, false);
+            }
+        }
 
         batch.draw(currentFrame, x-100, y-100);
     }
@@ -252,19 +256,20 @@ public class Player2 {
     }
 
 
-    public int getHP() {
+    public Double getHP() {
         return HP;
     }
 
-    public void setHP(int HP) {
+    public void setHP(Double HP) {
         this.HP = HP;
+        if (this.HP < 0) this.HP = 0.0;
     }
 
-    public int getDmg() {
+    public Double getDmg() {
         return dmg;
     }
 
-    public void setDmg(int dmg) {
+    public void setDmg(Double dmg) {
         this.dmg = dmg;
     }
 
@@ -322,5 +327,17 @@ public class Player2 {
 
     public void setState(State state) {
         this.state = state;
+    }
+    public boolean canHit (Player1 p1) {
+        if (act == Action.NO_ATTACK) {
+            return false;
+        }
+        float jarak = 0;
+        if (animationDirection == Direction.RIGHT) {
+            jarak = p1.getX() - x;
+        } else if (animationDirection == Direction.LEFT) {
+            jarak = x - p1.getX();
+        }
+        return jarak <= 100 && jarak > 50&&  p1.getY()-y == 0;
     }
 }
