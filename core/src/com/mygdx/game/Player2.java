@@ -37,7 +37,8 @@ public class Player2{
 
     enum Action {
         ATTACK,
-        NO_ATTACK
+        NO_ATTACK,
+        HIITED
     }
 
     Animation<TextureRegion> idleLeftAnimation, runLeftAnimation, idleRightAnimation, runRightAnimation, runRightJump, runLeftJump, runRightAttack, runLeftAttack,
@@ -116,6 +117,7 @@ public class Player2{
 
         frames = MyGdxGame.CreateAnimationFrames(fall, fall.getWidth()/2, fall.getHeight(), 2, true, false);
         runLeftFall = new Animation<TextureRegion>(0.09f, frames);
+
     }
 
     public void draw(SpriteBatch batch)
@@ -135,7 +137,6 @@ public class Player2{
         else if ((state == State.IDLE || state == State.RUN) && animationDirection == Direction.LEFT && act == Action.ATTACK){
             currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
         }
-
         else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
             currentFrame = runRightJump.getKeyFrame(stateTime, true);
         }
@@ -148,12 +149,20 @@ public class Player2{
         else if (state == State.FALL && animationDirection == Direction.LEFT) {
             currentFrame = runLeftFall.getKeyFrame(stateTime, true);
         }
-
         if (HP == 0) {
             if (animationDirection == Direction.LEFT) {
                 currentFrame = runLeftDeath.getKeyFrame(stateTime, false);
             } else if (animationDirection == Direction.RIGHT) {
                 currentFrame = runRightDeath.getKeyFrame(stateTime, false);
+            }
+        }
+        if (act == Action.HIITED) {
+            if (animationDirection == Direction.LEFT) {
+                currentFrame = runLeftHitted.getKeyFrame(stateTime, true);
+                act = Action.NO_ATTACK;
+            } else if (animationDirection == Direction.RIGHT) {
+                currentFrame = runRightHitted.getKeyFrame(stateTime, true);
+                act = Action.NO_ATTACK;
             }
         }
 
@@ -338,6 +347,6 @@ public class Player2{
         } else if (animationDirection == Direction.LEFT) {
             jarak = x - p1.getX();
         }
-        return jarak <= 100 && jarak > 50&&  p1.getY()-y == 0;
+        return jarak <= 100 && jarak > 50 &&  p1.getY()-y == 0;
     }
 }

@@ -38,6 +38,7 @@ public class Player1{
     enum Action {
         ATTACK,
         NO_ATTACK,
+        HIITED
     }
 
 
@@ -87,11 +88,11 @@ public class Player1{
 
         //attack hadap kanan
         frames = MyGdxGame.CreateAnimationFrames(attack1, attack1.getWidth()/6, attack1.getHeight(), 6, false, false);
-        runRightAttack = new Animation<TextureRegion>(0.04f, frames);
+        runRightAttack = new Animation<TextureRegion>(0.09f, frames);
 
         //attack hadap kiri
         frames = MyGdxGame.CreateAnimationFrames(attack1, attack1.getWidth()/6, attack1.getHeight(), 6, true, false);
-        runLeftAttack = new Animation<TextureRegion>(0.04f, frames);
+        runLeftAttack = new Animation<TextureRegion>(0.09f, frames);
 
         //mati hadap kanan
         frames = MyGdxGame.CreateAnimationFrames(death, death.getWidth()/6, death.getHeight(), 6, false, false);
@@ -125,8 +126,10 @@ public class Player1{
             currentFrame = runRightAnimation.getKeyFrame(stateTime, true);
         else if(state == State.IDLE && animationDirection == Direction.LEFT && act == Action.NO_ATTACK)
             currentFrame = idleLeftAnimation.getKeyFrame(stateTime, true);
+
         else if(state == State.IDLE && animationDirection == Direction.RIGHT && act == Action.NO_ATTACK)
             currentFrame = idleRightAnimation.getKeyFrame(stateTime, true);
+
         else if ((state == State.IDLE || state == State.RUN) && animationDirection == Direction.RIGHT && act == Action.ATTACK){
             currentFrame = runRightAttack.getKeyFrame(stateTime, true);
         }
@@ -151,6 +154,15 @@ public class Player1{
                 currentFrame = runLeftDeath.getKeyFrame(stateTime, false);
             } else if (animationDirection == Direction.RIGHT) {
                 currentFrame = runRightDeath.getKeyFrame(stateTime, false);
+            }
+        }
+        if (act == Action.HIITED) {
+            if (animationDirection == Direction.LEFT) {
+                currentFrame = runLeftHitted.getKeyFrame(stateTime, true);
+                act = Action.NO_ATTACK;
+            } else if (animationDirection == Direction.RIGHT) {
+                currentFrame = runRightHitted.getKeyFrame(stateTime, true);
+                act = Action.NO_ATTACK;
             }
         }
         batch.draw(currentFrame, x-100, y-100);
