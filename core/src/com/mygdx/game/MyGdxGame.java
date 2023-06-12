@@ -160,12 +160,12 @@ public class MyGdxGame extends Game implements InputProcessor {
 		if (p1.canHit(p2)) {
 			p2.setHP(p2.getHP()-p1.getDmg());
 			fontcache2.setText(String.format("Player 2 HP: %.2f",p2.getHP()), 655, 500);
-			p2.act = Player2.Action.HIITED;
+			p2.setAct(Player2.Action.HIITED);
 		}
 		else if (p2.canHit(p1)) {
 			p1.setHP(p1.getHP()-p2.getDmg());
 			fontcache1.setText(String.format("Player 1 HP: %.2f",p1.getHP()), 120, 500);
-			p1.act = Player1.Action.HIITED;
+			p1.setAct(Player1.Action.HIITED);
 		}
 	}
 

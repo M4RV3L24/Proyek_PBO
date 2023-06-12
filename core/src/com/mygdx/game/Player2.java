@@ -120,46 +120,44 @@ public class Player2{
     public void draw(SpriteBatch batch)
     {
         TextureRegion currentFrame = null;
-        if(state == State.RUN && animationDirection == Direction.LEFT && act == Action.NO_ATTACK)
-            currentFrame = runLeftAnimation.getKeyFrame(stateTime, true);
-        else if(state == State.RUN && animationDirection == Direction.RIGHT && act == Action.NO_ATTACK )
-            currentFrame = runRightAnimation.getKeyFrame(stateTime, true);
-        else if(state == State.IDLE && animationDirection == Direction.LEFT && act == Action.NO_ATTACK)
-            currentFrame = idleLeftAnimation.getKeyFrame(stateTime, true);
-        else if(state == State.IDLE && animationDirection == Direction.RIGHT && act == Action.NO_ATTACK)
-            currentFrame = idleRightAnimation.getKeyFrame(stateTime, true);
-        else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.RIGHT && act == Action.ATTACK){
-            currentFrame = runRightAttack.getKeyFrame(stateTime, true);
-        }
-        else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.LEFT && act == Action.ATTACK){
-            currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
-        }
-        else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
-            currentFrame = runRightJump.getKeyFrame(stateTime, true);
-        }
-        else if (state == State.FALL && animationDirection == Direction.RIGHT) {
-            currentFrame = runRightFall.getKeyFrame(stateTime, true);
-        }
-        else if ((state == State.JUMP) && animationDirection == Direction.LEFT) {
-            currentFrame = runLeftJump.getKeyFrame(stateTime, true);
-        }
-        else if (state == State.FALL && animationDirection == Direction.LEFT) {
-            currentFrame = runLeftFall.getKeyFrame(stateTime, true);
-        }
-        if (HP == 0) {
+
+        if (HP <= 0) {
             if (animationDirection == Direction.LEFT) {
                 currentFrame = runLeftDeath.getKeyFrame(stateTime, false);
             } else if (animationDirection == Direction.RIGHT) {
                 currentFrame = runRightDeath.getKeyFrame(stateTime, false);
             }
         }
-        if (act == Action.HIITED) {
-            if (animationDirection == Direction.LEFT) {
-                currentFrame = runLeftHitted.getKeyFrame(stateTime, true);
-                act = Action.NO_ATTACK;
-            } else if (animationDirection == Direction.RIGHT) {
-                currentFrame = runRightHitted.getKeyFrame(stateTime, true);
-                act = Action.NO_ATTACK;
+        else {
+            if (state == State.RUN && animationDirection == Direction.LEFT && act == Action.NO_ATTACK)
+                currentFrame = runLeftAnimation.getKeyFrame(stateTime, true);
+            else if (state == State.RUN && animationDirection == Direction.RIGHT && act == Action.NO_ATTACK)
+                currentFrame = runRightAnimation.getKeyFrame(stateTime, true);
+            else if (state == State.IDLE && animationDirection == Direction.LEFT && act == Action.NO_ATTACK)
+                currentFrame = idleLeftAnimation.getKeyFrame(stateTime, true);
+            else if (state == State.IDLE && animationDirection == Direction.RIGHT && act == Action.NO_ATTACK)
+                currentFrame = idleRightAnimation.getKeyFrame(stateTime, true);
+            else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.RIGHT && act == Action.ATTACK) {
+                currentFrame = runRightAttack.getKeyFrame(stateTime, true);
+            } else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.LEFT && act == Action.ATTACK) {
+                currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
+            } else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
+                currentFrame = runRightJump.getKeyFrame(stateTime, true);
+            } else if (state == State.FALL && animationDirection == Direction.RIGHT) {
+                currentFrame = runRightFall.getKeyFrame(stateTime, true);
+            } else if ((state == State.JUMP) && animationDirection == Direction.LEFT) {
+                currentFrame = runLeftJump.getKeyFrame(stateTime, true);
+            } else if (state == State.FALL && animationDirection == Direction.LEFT) {
+                currentFrame = runLeftFall.getKeyFrame(stateTime, true);
+            }
+            if (act == Action.HIITED) {
+                if (animationDirection == Direction.LEFT) {
+                    currentFrame = runLeftHitted.getKeyFrame(stateTime, true);
+                    act = Action.NO_ATTACK;
+                } else if (animationDirection == Direction.RIGHT) {
+                    currentFrame = runRightHitted.getKeyFrame(stateTime, true);
+                    act = Action.NO_ATTACK;
+                }
             }
         }
 
@@ -339,15 +337,26 @@ public class Player2{
         this.state = state;
     }
     public boolean canHit (Player1 p1) {
-        if (act == Action.NO_ATTACK) {
-            return false;
+        if (HP > 0) {
+            if (act == Action.NO_ATTACK) {
+                return false;
+            }
+            float jarak = 0;
+            if (animationDirection == Direction.RIGHT) {
+                jarak = p1.getX() - x;
+            } else if (animationDirection == Direction.LEFT) {
+                jarak = x - p1.getX();
+            }
+            return jarak <= 100 && jarak > 50 && Math.abs(p1.getY() - y) <= 10;
         }
-        float jarak = 0;
-        if (animationDirection == Direction.RIGHT) {
-            jarak = p1.getX() - x;
-        } else if (animationDirection == Direction.LEFT) {
-            jarak = x - p1.getX();
-        }
-        return jarak <= 100 && jarak > 50 &&  Math.abs(p1.getY()-y) <= 10;
+        return false;
+    }
+
+    public Action getAct() {
+        return act;
+    }
+
+    public void setAct(Action act) {
+        this.act = act;
     }
 }
