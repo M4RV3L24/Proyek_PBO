@@ -140,9 +140,13 @@ public class Player1{
 
             else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.RIGHT && act == Action.ATTACK) {
                 currentFrame = runRightAttack.getKeyFrame(stateTime, true);
+                if (state == State.RUN) Stop();
             } else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.LEFT && act == Action.ATTACK) {
                 currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
-            } else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
+                if (state == State.RUN) Stop();
+            }
+
+            else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
                 currentFrame = runRightJump.getKeyFrame(stateTime, true);
             } else if (state == State.FALL && animationDirection == Direction.RIGHT) {
                 currentFrame = runRightFall.getKeyFrame(stateTime, true);
