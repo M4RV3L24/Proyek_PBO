@@ -168,9 +168,10 @@ public class Player2{
 
     public void update()
     {
+        float elapsed = Gdx.graphics.getDeltaTime();
+        stateTime += elapsed;
         if (HP > 0) {
-            float elapsed = Gdx.graphics.getDeltaTime();
-            stateTime += elapsed;
+
 
             x += dx * speed * elapsed;
             if (x > MyGdxGame.WORLD_WIDTH - 20) {
