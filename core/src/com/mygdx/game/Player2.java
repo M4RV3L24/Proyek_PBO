@@ -13,7 +13,7 @@ public class Player2{
     }
 
     Double HP = 100.0;
-    Double dmg = 0.05;
+    Double dmg = 0.1;
 
     float stateTime = 0.0f;
     float x, y;
@@ -44,9 +44,6 @@ public class Player2{
     Animation<TextureRegion> idleLeftAnimation, runLeftAnimation, idleRightAnimation, runRightAnimation, runRightJump, runLeftJump, runRightAttack, runLeftAttack,
             runRightDeath, runLeftDeath, runRightHitted, runLeftHitted, runRightFall, runLeftFall;
 
-    void minusHP (int dmg) {
-        HP-=dmg;
-    }
 
 
     public void generatePlayerAnimation()
@@ -131,10 +128,10 @@ public class Player2{
             currentFrame = idleLeftAnimation.getKeyFrame(stateTime, true);
         else if(state == State.IDLE && animationDirection == Direction.RIGHT && act == Action.NO_ATTACK)
             currentFrame = idleRightAnimation.getKeyFrame(stateTime, true);
-        else if ((state == State.IDLE || state == State.RUN) && animationDirection == Direction.RIGHT && act == Action.ATTACK){
+        else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.RIGHT && act == Action.ATTACK){
             currentFrame = runRightAttack.getKeyFrame(stateTime, true);
         }
-        else if ((state == State.IDLE || state == State.RUN) && animationDirection == Direction.LEFT && act == Action.ATTACK){
+        else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.LEFT && act == Action.ATTACK){
             currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
         }
         else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
@@ -171,96 +168,100 @@ public class Player2{
 
     public void update()
     {
-        float elapsed = Gdx.graphics.getDeltaTime();
-        stateTime += elapsed;
+        if (HP > 0) {
+            float elapsed = Gdx.graphics.getDeltaTime();
+            stateTime += elapsed;
 
-        x += dx * speed * elapsed;
-        if(x > MyGdxGame.WORLD_WIDTH-20)
-        {
-            x = MyGdxGame.WORLD_WIDTH-20;
-            this.Stop();
-        }
-        else if(x < 20)
-        {
-            x = 20;
-            this.Stop();
-        }
+            x += dx * speed * elapsed;
+            if (x > MyGdxGame.WORLD_WIDTH - 20) {
+                x = MyGdxGame.WORLD_WIDTH - 20;
+                this.Stop();
+            } else if (x < 20) {
+                x = 20;
+                this.Stop();
+            }
 
 
-        y += dy * speed * elapsed;
-        if(y > 200+100)
-        {
-            y = 300;
-            dy = -1;
-            this.Jump(State.FALL);
-        }
-        else if(y < 140)
-        {
-            y = 140;
-            this.Stop();
+            y += dy * speed * elapsed;
+            if (y > 200 + 120) {
+                y = 300;
+                dy = -1;
+                this.Jump(State.FALL);
+            } else if (y < 140) {
+                y = 140;
+                this.Stop();
+            }
         }
     }
 
     void Jump (State s){
-        if (state == State.IDLE && s == State.JUMP) {
-            state = State.JUMP;
-            dy = 1;
-        }
-        if (state == State.JUMP && s == State.FALL) {
-            state = State.FALL;
-            dy = -1;
+        if (HP > 0) {
+            if ((state == State.IDLE || state == State.FALL || state == State.RUN) && s == State.JUMP) {
+                state = State.JUMP;
+                dy = 1;
+            }
+            if ((state == State.JUMP || state == State.IDLE || state == State.RUN) && s == State.FALL) {
+                state = State.FALL;
+                dy = -1;
+            }
         }
     }
 
     public void setMove(Direction d)
     {
-        direction = d;
-        state = State.RUN; // update state dan arah animasi
+        if (HP > 0) {
+            direction = d;
 
-        if(animationDirection == Direction.LEFT && d == Direction.RIGHT)
-        {
-            animationDirection = Direction.RIGHT;
-            stateTime = 0;
+            if (animationDirection == Direction.LEFT && d == Direction.RIGHT) {
+                animationDirection = Direction.RIGHT;
+                stateTime = 0;
+            } else if (animationDirection == Direction.RIGHT && d == Direction.LEFT) {
+                animationDirection = Direction.LEFT;
+                stateTime = 0;
+            }
+            if (d == Direction.RIGHT) {
+                dx = 1;
+                dy = 0;
+            } else if (d == Direction.LEFT) {
+                dx = -1;
+                dy = 0;
+            }
+
+            if (y == 140) {
+                state = State.RUN; // update state dan arah animasi
+            } else {
+                if (state == State.FALL) {
+                    dy = -1;
+                }
+                if (state == State.JUMP) {
+                    dy = 1;
+                }
+            }
         }
-        else if(animationDirection == Direction.RIGHT && d == Direction.LEFT)
-        {
-            animationDirection = Direction.LEFT;
-            stateTime = 0;
-        }
-        if(d == Direction.RIGHT)
-        {
-            dx = 1;
-            dy = 0;
-        }
-        else if(d == Direction.LEFT)
-        {
-            dx = -1;
-            dy = 0;
-        }
-//        else if(d == Direction.JUMP)
-//        {
-//            dx = 0;
-//            dy = -1;
-//        }
     }
 
 
     void Attack (Action a) {
-        if (a == Action.NO_ATTACK && act == Action.ATTACK) {
-            act = a;
-        }
-        else if (a == Action.ATTACK && act == Action.NO_ATTACK) {
-            act = a;
+        if (HP > 0) {
+            if (a == Action.NO_ATTACK && act == Action.ATTACK) {
+                act = a;
+            } else if (a == Action.ATTACK && act == Action.NO_ATTACK) {
+                act = a;
+            }
         }
     }
 
 
     void Stop()
     {
-        if(state != State.IDLE) {
+        if(state != State.IDLE && y == 140) {
             dx = 0;
             dy = 0;
             state = State.IDLE;
+        }
+        else if (y > 140) {
+            state = State.FALL;
+            dy = -1;
         }
     }
 
@@ -347,6 +348,6 @@ public class Player2{
         } else if (animationDirection == Direction.LEFT) {
             jarak = x - p1.getX();
         }
-        return jarak <= 100 && jarak > 50 &&  p1.getY()-y == 0;
+        return jarak <= 100 && jarak > 50 &&  Math.abs(p1.getY()-y) <= 10;
     }
 }

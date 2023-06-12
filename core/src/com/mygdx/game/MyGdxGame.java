@@ -20,7 +20,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 
 	public static final float WORLD_WIDTH = 1000;
-	public static final float WORLD_HEIGHT = 700;
+	public static final float WORLD_HEIGHT = 600;
 
 	AssetManager manager = new AssetManager();
 	SpriteBatch batch;
@@ -86,8 +86,8 @@ public class MyGdxGame extends Game implements InputProcessor {
 		fontcache2 = new BitmapFontCache(font);
 
 
-		fontcache1.setText("Player 1 HP: 100", 100, 600);
-		fontcache2.setText("Player 2 HP: 100", 670, 600);
+		fontcache1.setText("Player 1 HP: 100", 120, 500);
+		fontcache2.setText("Player 2 HP: 100", 650, 500);
 
 		img = manager.get("Lost City Cover.jpeg");
 		obj = new Sprite(img);
@@ -107,12 +107,12 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 
 		p1 = new Player1();
-		p1.setX(100);
+		p1.setX(200);
 		p1.setY(140);
 
 
 		p2 = new Player2();
-		p2.setX(1000-100);
+		p2.setX(1000-200);
 		p2.setY(140);
 		Gdx.input.setInputProcessor(this);
 
@@ -134,6 +134,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
+
 		obj.draw(batch);
 		p2.draw(batch);
 		p1.draw(batch);
@@ -158,12 +159,12 @@ public class MyGdxGame extends Game implements InputProcessor {
 		p2.update();
 		if (p1.canHit(p2)) {
 			p2.setHP(p2.getHP()-p1.getDmg());
-			fontcache2.setText(String.format("Player 2 HP: %.2f",p2.getHP()), 670, 600);
+			fontcache2.setText(String.format("Player 2 HP: %.2f",p2.getHP()), 650, 400);
 			p2.act = Player2.Action.HIITED;
 		}
 		else if (p2.canHit(p1)) {
 			p1.setHP(p1.getHP()-p2.getDmg());
-			fontcache1.setText(String.format("Player 1 HP: %.2f",p1.getHP()), 100, 600);
+			fontcache1.setText(String.format("Player 1 HP: %.2f",p1.getHP()), 120, 400);
 			p1.act = Player1.Action.HIITED;
 		}
 	}
@@ -171,6 +172,8 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
+		//Player 1 Control
+
 		if (keycode == Input.Keys.W) {
 			p1.Jump(Player1.State.JUMP);
 		}
@@ -183,7 +186,12 @@ public class MyGdxGame extends Game implements InputProcessor {
 		if (keycode == Input.Keys.CONTROL_LEFT) {
 			p1.Attack(Player1.Action.ATTACK);
 		}
+		if (keycode == Input.Keys.S){
+			p1.Jump(Player1.State.FALL);
+		}
 
+
+		//Player 2 Control
 		if (keycode == Input.Keys.UP) {
 			p2.Jump(Player2.State.JUMP);
 		}
@@ -196,6 +204,9 @@ public class MyGdxGame extends Game implements InputProcessor {
 		if (keycode == Input.Keys.CONTROL_RIGHT) {
 			p2.Attack(Player2.Action.ATTACK);
 		}
+		if (keycode == Input.Keys.DOWN) {
+			p2.Jump(Player2.State.FALL);
+		}
 
 		return true;
 	}
@@ -204,11 +215,12 @@ public class MyGdxGame extends Game implements InputProcessor {
 	public boolean keyUp(int keycode) {
 		if(keycode == Input.Keys.A && p1.getDirection() == Player1.Direction.LEFT)
 			p1.Stop();
-		else if(keycode == Input.Keys.D && p1.getDirection() == Player1.Direction.RIGHT)
+		if(keycode == Input.Keys.D && p1.getDirection() == Player1.Direction.RIGHT)
 			p1.Stop();
-		else if(keycode == Input.Keys.W && p1.getState() == Player1.State.JUMP)
+		if(keycode == Input.Keys.W && p1.getState() == Player1.State.JUMP)
 			p1.Jump(Player1.State.FALL);
 		p1.Attack(Player1.Action.NO_ATTACK);
+
 
 		if(keycode == Input.Keys.LEFT && p2.getDirection() == Player2.Direction.LEFT)
 			p2.Stop();
