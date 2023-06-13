@@ -13,7 +13,7 @@ public class Player1{
     }
 
     Double HP = 100.0;
-    double dmg = 0.1;
+    double dmg = 5.0;
 
     float stateTime = 0.0f;
     float x, y;
@@ -38,7 +38,7 @@ public class Player1{
     enum Action {
         ATTACK,
         NO_ATTACK,
-        HIITED
+        HITTED
     }
 
 
@@ -46,12 +46,13 @@ public class Player1{
     Animation<TextureRegion> idleLeftAnimation, runLeftAnimation, idleRightAnimation, runRightAnimation, runRightJump, runLeftJump, runRightAttack, runLeftAttack,
             runRightDeath, runLeftDeath, runRightHitted, runLeftHitted, runLeftFall, runRightFall;
 
+    MyGdxGame app;
 
 
 
     public void generatePlayerAnimation()
     {
-        MyGdxGame app = (MyGdxGame) Gdx.app.getApplicationListener();
+        app = (MyGdxGame) Gdx.app.getApplicationListener();
         AssetManager assetManager = app.getManager();
 
         Texture idle = assetManager.get("Sprite1/Idle.png");
@@ -104,11 +105,11 @@ public class Player1{
 
         //kena hit dari kanan
         frames = MyGdxGame.CreateAnimationFrames(hitted, hitted.getWidth()/4, hitted.getHeight(), 4, false, false);
-        runRightHitted = new Animation<TextureRegion>(0.09f, frames);
+        runRightHitted = new Animation<TextureRegion>(0.06f, frames);
 
         //kena hit dari kiri
         frames = MyGdxGame.CreateAnimationFrames(hitted, hitted.getWidth()/4, hitted.getHeight(), 4, true, false);
-        runLeftHitted= new Animation<TextureRegion>(0.09f, frames);
+        runLeftHitted= new Animation<TextureRegion>(0.06f, frames);
 
         frames = MyGdxGame.CreateAnimationFrames(fall, fall.getWidth()/2, fall.getHeight(), 2, false, false);
         runRightFall = new Animation<TextureRegion>(0.09f, frames);
@@ -141,11 +142,28 @@ public class Player1{
             else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.RIGHT && act == Action.ATTACK) {
                 currentFrame = runRightAttack.getKeyFrame(stateTime, true);
                 if (state == State.RUN) Stop();
+                if (stateTime >= Gdx.graphics.getDeltaTime() * 16) {
+                    if (app.p1.canHit(app.p2)) {
+                        app.p2.setHP(app.p2.getHP()-app.p1.getDmg());
+                        app.fontcache2.setText(String.format("Player 2 HP: %.2f",app.p2.getHP()), 655, 500);
+                        app.p2.doAction(Player2.Action.HITTED);
+
+                    }
+                    doAction(Action.NO_ATTACK);
+                }
+
             } else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.LEFT && act == Action.ATTACK) {
                 currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
                 if (state == State.RUN) Stop();
+                if (stateTime >= Gdx.graphics.getDeltaTime() * 16) {
+                    if (app.p1.canHit(app.p2)) {
+                        app.p2.setHP(app.p2.getHP()-app.p1.getDmg());
+                        app.fontcache2.setText(String.format("Player 2 HP: %.2f",app.p2.getHP()), 655, 500);
+                        app.p2.doAction(Player2.Action.HITTED);
+                    }
+                    doAction(Action.NO_ATTACK);
+                }
             }
-
             else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
                 currentFrame = runRightJump.getKeyFrame(stateTime, true);
             } else if (state == State.FALL && animationDirection == Direction.RIGHT) {
@@ -155,14 +173,14 @@ public class Player1{
             } else if (state == State.FALL && animationDirection == Direction.LEFT) {
                 currentFrame = runLeftFall.getKeyFrame(stateTime, true);
             }
-            if (act == Action.HIITED) {
+            if (act == Action.HITTED) {
                 if (animationDirection == Direction.LEFT) {
                     currentFrame = runLeftHitted.getKeyFrame(stateTime, true);
-                    act = Action.NO_ATTACK;
-                } else if (animationDirection == Direction.RIGHT) {
-                    currentFrame = runRightHitted.getKeyFrame(stateTime, true);
-                    act = Action.NO_ATTACK;
                 }
+                if (animationDirection == Direction.RIGHT) {
+                    currentFrame = runRightHitted.getKeyFrame(stateTime, true);
+                }
+                if (stateTime >= Gdx.graphics.getDeltaTime() * 9) doAction(Action.NO_ATTACK);
             }
         }
         batch.draw(currentFrame, x-100, y-100);
@@ -191,6 +209,15 @@ public class Player1{
                 y = 140;
                 this.Stop();
             }
+            if (act == Action.HITTED) {
+                if (app.p2.direction == Player2.Direction.RIGHT) {
+                    x+= speed * elapsed * 0.8;
+                }
+                else if (app.p2.direction == Player2.Direction.LEFT) {
+                    x-= speed * elapsed * 0.8;
+                }
+            }
+
         }
 
     }
@@ -233,23 +260,39 @@ public class Player1{
                     dy = 1;
                 }
             }
-
-
-//        else if(d == Direction.JUMP)
-//        {
-//            dx = 0;
-//            dy = -1;
-//        }
         }
     }
 
+//    void Hitted () {
+//        float elapsed = Gdx.graphics.getDeltaTime();
+//        stateTime += elapsed;
+//        if (HP > 0) {
+//            if ( act == Action.NO_ATTACK) {
+//                act = Action.HITTED;
+//                stateTime = 0;
+//            } else if (act == Action.HITTED) {
+//                act = Action.NO_ATTACK;
+//                stateTime = 0;
+//            }
+//        }
+//    }
 
-    void Attack (Action a) {
+
+
+    void doAction(Action a) {
+        float elapsed = Gdx.graphics.getDeltaTime();
+        stateTime += elapsed;
         if (HP > 0) {
-            if (a == Action.NO_ATTACK && act == Action.ATTACK) {
+            if (a == Action.NO_ATTACK && (act == Action.HITTED || act == Action.ATTACK)) {
                 act = a;
-            } else if (a == Action.ATTACK && act == Action.NO_ATTACK) {
+                stateTime = 0;
+            } else if (a == Action.ATTACK && (act == Action.HITTED || act == Action.NO_ATTACK)) {
                 act = a;
+                stateTime = 0;
+            }
+            else if (a == Action.HITTED && (act == Action.NO_ATTACK || act == Action.ATTACK)) {
+                act = a;
+                stateTime = 0;
             }
         }
     }
@@ -360,16 +403,16 @@ public class Player1{
             if (act == Action.NO_ATTACK) {
                 return false;
             }
-            float jarak = 0;
-            if (animationDirection == Direction.RIGHT) {
-                jarak = p2.getX() - x;
-            } else if (animationDirection == Direction.LEFT) {
-                jarak = x - p2.getX();
+            else if (act == Action.ATTACK) {
+                float jarak = 0;
+                if (animationDirection == Direction.RIGHT) {
+                    jarak = p2.getX() - x;
+                } else if (animationDirection == Direction.LEFT) {
+                    jarak = x - p2.getX();
+                }
+                return jarak <= 100 && jarak > 50 && Math.abs(p2.getY() - y) <= 10;
             }
-            return jarak <= 100 && jarak > 50 && Math.abs(p2.getY() - y) <= 10;
         }
         return false;
     }
-
-
 }

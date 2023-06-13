@@ -157,16 +157,17 @@ public class MyGdxGame extends Game implements InputProcessor {
 	public void update () {
 		p1.update();
 		p2.update();
-		if (p1.canHit(p2)) {
-			p2.setHP(p2.getHP()-p1.getDmg());
-			fontcache2.setText(String.format("Player 2 HP: %.2f",p2.getHP()), 655, 500);
-			p2.setAct(Player2.Action.HIITED);
-		}
-		else if (p2.canHit(p1)) {
-			p1.setHP(p1.getHP()-p2.getDmg());
-			fontcache1.setText(String.format("Player 1 HP: %.2f",p1.getHP()), 120, 500);
-			p1.setAct(Player1.Action.HIITED);
-		}
+//		if (p1.canHit(p2)) {
+//			p2.setHP(p2.getHP()-p1.getDmg());
+//			fontcache2.setText(String.format("Player 2 HP: %.2f",p2.getHP()), 655, 500);
+//			p2.setAct(Player2.Action.HIITED);
+//		}
+//		else if (p2.canHit(p1)) {
+//			p1.setHP(p1.getHP()-p2.getDmg());
+//			fontcache1.setText(String.format("Player 1 HP: %.2f",p1.getHP()), 120, 500);
+//			p1.setAct(Player1.Action.HIITED);
+//		}
+
 	}
 
 
@@ -184,7 +185,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 			p1.setMove(Player1.Direction.LEFT);
 		}
 		if (keycode == Input.Keys.CONTROL_LEFT) {
-			p1.Attack(Player1.Action.ATTACK);
+			p1.doAction(Player1.Action.ATTACK);
 		}
 		if (keycode == Input.Keys.S){
 			p1.Jump(Player1.State.FALL);
@@ -202,7 +203,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 			p2.setMove(Player2.Direction.LEFT);
 		}
 		if (keycode == Input.Keys.CONTROL_RIGHT) {
-			p2.Attack(Player2.Action.ATTACK);
+			p2.doAction(Player2.Action.ATTACK);
 		}
 		if (keycode == Input.Keys.DOWN) {
 			p2.Jump(Player2.State.FALL);
@@ -219,7 +220,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 			p1.Stop();
 		if(keycode == Input.Keys.W && p1.getState() == Player1.State.JUMP)
 			p1.Jump(Player1.State.FALL);
-		p1.Attack(Player1.Action.NO_ATTACK);
+//		p1.Attack(Player1.Action.NO_ATTACK);
 
 
 		if(keycode == Input.Keys.LEFT && p2.getDirection() == Player2.Direction.LEFT)
@@ -228,7 +229,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 			p2.Stop();
 		else if(keycode == Input.Keys.UP && p2.getState() == Player2.State.JUMP)
 			p2.Jump(Player2.State.FALL);
-		p2.Attack(Player2.Action.NO_ATTACK);
+//		p2.Attack(Player2.Action.NO_ATTACK);
 		return true;
 	}
 

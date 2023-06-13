@@ -13,7 +13,7 @@ public class Player2{
     }
 
     Double HP = 100.0;
-    Double dmg = 0.1;
+    Double dmg = 5.0;
 
     float stateTime = 0.0f;
     float x, y;
@@ -38,17 +38,17 @@ public class Player2{
     enum Action {
         ATTACK,
         NO_ATTACK,
-        HIITED
+        HITTED
     }
 
     Animation<TextureRegion> idleLeftAnimation, runLeftAnimation, idleRightAnimation, runRightAnimation, runRightJump, runLeftJump, runRightAttack, runLeftAttack,
             runRightDeath, runLeftDeath, runRightHitted, runLeftHitted, runRightFall, runLeftFall;
 
-
+    MyGdxGame app;
 
     public void generatePlayerAnimation()
     {
-        MyGdxGame app = (MyGdxGame) Gdx.app.getApplicationListener();
+        app = (MyGdxGame) Gdx.app.getApplicationListener();
         AssetManager assetManager = app.getManager();
 
         Texture idle = assetManager.get("Sprite2/Idle.png");
@@ -140,9 +140,25 @@ public class Player2{
             else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.RIGHT && act == Action.ATTACK) {
                 currentFrame = runRightAttack.getKeyFrame(stateTime, true);
                 if (state == State.RUN) Stop();
+                if (stateTime >= Gdx.graphics.getDeltaTime() * 17) {
+                    if (app.p2.canHit(app.p1)) {
+                        app.p1.setHP(app.p1.getHP()-app.p2.getDmg());
+                        app.fontcache1.setText(String.format("Player 1 HP: %.2f",app.p1.getHP()), 120, 500);
+                        app.p1.doAction(Player1.Action.HITTED);
+                    }
+                    doAction(Action.NO_ATTACK);
+                }
             } else if ((state == State.IDLE || state == State.RUN || state == State.JUMP) && animationDirection == Direction.LEFT && act == Action.ATTACK) {
                 currentFrame = runLeftAttack.getKeyFrame(stateTime, true);
                 if (state == State.RUN) Stop();
+                if (stateTime >= Gdx.graphics.getDeltaTime() * 17) {
+                    if (app.p2.canHit(app.p1)) {
+                        app.p1.setHP(app.p1.getHP()-app.p2.getDmg());
+                        app.fontcache1.setText(String.format("Player 1 HP: %.2f",app.p1.getHP()), 120, 500);
+                        app.p1.doAction(Player1.Action.HITTED);
+                    }
+                    doAction(Action.NO_ATTACK);
+                }
             } else if ((state == State.JUMP) && animationDirection == Direction.RIGHT) {
                 currentFrame = runRightJump.getKeyFrame(stateTime, true);
             } else if (state == State.FALL && animationDirection == Direction.RIGHT) {
@@ -152,14 +168,14 @@ public class Player2{
             } else if (state == State.FALL && animationDirection == Direction.LEFT) {
                 currentFrame = runLeftFall.getKeyFrame(stateTime, true);
             }
-            if (act == Action.HIITED) {
+            if (act == Action.HITTED) {
                 if (animationDirection == Direction.LEFT) {
                     currentFrame = runLeftHitted.getKeyFrame(stateTime, true);
-                    act = Action.NO_ATTACK;
-                } else if (animationDirection == Direction.RIGHT) {
-                    currentFrame = runRightHitted.getKeyFrame(stateTime, true);
-                    act = Action.NO_ATTACK;
                 }
+                else if (animationDirection == Direction.RIGHT) {
+                    currentFrame = runRightHitted.getKeyFrame(stateTime, true);
+                }
+                if (stateTime >= Gdx.graphics.getDeltaTime() * 9) doAction(Action.NO_ATTACK);
             }
         }
 
@@ -191,6 +207,15 @@ public class Player2{
             } else if (y < 140) {
                 y = 140;
                 this.Stop();
+            }
+            if (act == Action.HITTED) {
+                if (app.p1.direction == Player1.Direction.RIGHT) {
+                    x+= speed * elapsed * 0.8;
+                }
+                else if (app.p1.direction == Player1.Direction.LEFT) {
+                    x-= speed * elapsed * 0.8;
+                }
+
             }
         }
     }
@@ -242,12 +267,21 @@ public class Player2{
     }
 
 
-    void Attack (Action a) {
+    void doAction (Action a) {
+        float elapsed = Gdx.graphics.getDeltaTime();
+        stateTime += elapsed;
         if (HP > 0) {
-            if (a == Action.NO_ATTACK && act == Action.ATTACK) {
+            if (a == Action.NO_ATTACK && (act == Action.ATTACK || act == Action.HITTED)) {
                 act = a;
-            } else if (a == Action.ATTACK && act == Action.NO_ATTACK) {
+                stateTime = 0;
+            }
+            else if (a == Action.ATTACK && (act == Action.NO_ATTACK || act == Action.HITTED)) {
                 act = a;
+                stateTime = 0;
+            }
+            else if (a == Action.HITTED && (act == Action.NO_ATTACK || act == Action.ATTACK)) {
+                act = a;
+                stateTime = 0;
             }
         }
     }
@@ -344,13 +378,15 @@ public class Player2{
             if (act == Action.NO_ATTACK) {
                 return false;
             }
-            float jarak = 0;
-            if (animationDirection == Direction.RIGHT) {
-                jarak = p1.getX() - x;
-            } else if (animationDirection == Direction.LEFT) {
-                jarak = x - p1.getX();
+            else if (act == Action.ATTACK) {
+                float jarak = 0;
+                if (animationDirection == Direction.RIGHT) {
+                    jarak = p1.getX() - x;
+                } else if (animationDirection == Direction.LEFT) {
+                    jarak = x - p1.getX();
+                }
+                return jarak <= 100 && jarak > 50 && Math.abs(p1.getY() - y) <= 10;
             }
-            return jarak <= 100 && jarak > 50 && Math.abs(p1.getY() - y) <= 10;
         }
         return false;
     }
