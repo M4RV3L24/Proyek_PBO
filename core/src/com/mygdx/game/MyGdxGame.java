@@ -165,6 +165,8 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 
 	public void update () {
+		p1_hp.setSize((float)(450 * p1.ratioHP), p1_hp.getHeight());
+		p2_hp.setSize((float)(450 * p2.ratioHP), p2_hp.getHeight());
 		p1.update();
 		p2.update();
 //		if (p1.canHit(p2)) {

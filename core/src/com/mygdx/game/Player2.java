@@ -13,6 +13,7 @@ public class Player2{
     }
 
     Double HP = 100.0;
+    Double ratioHP = 1.0;
 
     Double dmg = 10.0;
 
@@ -145,7 +146,7 @@ public class Player2{
                     if (app.p2.canHit(app.p1)) {
                         app.p1.setHP(app.p1.getHP()-app.p2.getDmg());
                         app.fontcache1.setText(String.format("Player 1 HP: %.2f",app.p1.getHP()), 120, 500);
-                        app.p1_hp.setSize((float) (450 * app.p1.getHP()/100.0), app.p1_hp.getHeight());
+//                        app.p1_hp.setSize((float) (450 * app.p1.getHP()/100.0), app.p1_hp.getHeight());
                         app.p1.doAction(Player1.Action.HITTED);
                     }
                     doAction(Action.NO_ATTACK);
@@ -157,7 +158,7 @@ public class Player2{
                     if (app.p2.canHit(app.p1)) {
                         app.p1.setHP(app.p1.getHP()-app.p2.getDmg());
                         app.fontcache1.setText(String.format("Player 1 HP: %.2f",app.p1.getHP()), 120, 500);
-                        app.p1_hp.setSize((float) (450*app.p1.getHP()/100.0), app.p1_hp.getHeight());
+//                        app.p1_hp.setSize((float) (450*app.p1.getHP()/100.0), app.p1_hp.getHeight());
                         app.p1.doAction(Player1.Action.HITTED);
                     }
                     doAction(Action.NO_ATTACK);
@@ -187,6 +188,7 @@ public class Player2{
 
     public void update()
     {
+        ratioHP = HP/100.0;
         float elapsed = Gdx.graphics.getDeltaTime();
         stateTime += elapsed;
         if (HP > 0) {
