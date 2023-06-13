@@ -21,13 +21,12 @@ public class MyGdxGame extends Game implements InputProcessor {
 
 	public static final float WORLD_WIDTH = 1000;
 	public static final float WORLD_HEIGHT = 600;
-
 	AssetManager manager = new AssetManager();
 	SpriteBatch batch;
-	Texture img;
+	Texture background_image, HP_p1, HP_p2, bar, vs;
 	Player1 p1;
 	Player2 p2;
-	Sprite obj;
+	Sprite obj, p1_hp, p2_hp, black_bar, logo;
 	OrthographicCamera camera;
 	Viewport viewport;
 	BitmapFont font;
@@ -50,16 +49,10 @@ public class MyGdxGame extends Game implements InputProcessor {
 		fontParameter.fontParameters.flip = false;
 		manager.load("04b_25__.ttf", BitmapFont.class, fontParameter);
 
-//		FreetypeFontLoader.FreeTypeFontLoaderParameter bigfontParameter = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-//		bigfontParameter.fontFileName = "04b_25__.ttf";
-//		bigfontParameter.fontParameters.size = 48;
-//		bigfontParameter.fontParameters.color = Color.WHITE;
-//		bigfontParameter.fontParameters.borderColor = Color.BLACK;
-//		bigfontParameter.fontParameters.borderWidth = 2;
-//		bigfontParameter.fontParameters.flip = false;
-//		manager.load("04b_25__.ttf", BitmapFont.class, bigfontParameter);
-
-
+//		asset buat hp bar
+		manager.load("black rectangle.png", Texture.class);
+		manager.load("red rectangle.png", Texture.class);
+		manager.load("vs_logo.png", Texture.class);
 
 //		asset buat player 1
 		manager.load("Sprite1/Attack1.png", Texture.class);
@@ -81,16 +74,16 @@ public class MyGdxGame extends Game implements InputProcessor {
 		manager.load("Sprite2/Fall.png", Texture.class);
 
 		manager.finishLoading();
+
+
 		font = manager.get("04b_25__.ttf");
 		fontcache1 = new BitmapFontCache(font);
 		fontcache2 = new BitmapFontCache(font);
-
-
 		fontcache1.setText("Player 1 HP: 100", 120, 500);
 		fontcache2.setText("Player 2 HP: 100", 655, 500);
 
-		img = manager.get("Lost City Cover.jpeg");
-		obj = new Sprite(img);
+		background_image = manager.get("Lost City Cover.jpeg");
+		obj = new Sprite(background_image);
 		obj.setSize(WORLD_WIDTH, WORLD_HEIGHT);
 		obj.setPosition(0, 0);
 
@@ -98,27 +91,38 @@ public class MyGdxGame extends Game implements InputProcessor {
 		camera.setToOrtho(false, WORLD_WIDTH, WORLD_HEIGHT);
 		viewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),camera);
 
-//		obj.flip(false, true);
-//		Texture img = manager.get("Idle.png");
-//		obj = new Sprite(img);
-//		obj.flip(false, true);
-//		obj.setPosition(200,200);
-
-
-
 		p1 = new Player1();
 		p1.setX(200);
 		p1.setY(140);
 
-
 		p2 = new Player2();
 		p2.setX(1000-200);
 		p2.setY(140);
+
+		//HP bar
+		bar = manager.get("black rectangle.png");
+		black_bar = new Sprite(bar);
+		black_bar.setPosition(0, 450);
+		black_bar.setSize(1000, 50);
+		black_bar.setColor(Color.BLACK);
+
+		HP_p1 = manager.get("red rectangle.png");
+		p1_hp = new Sprite(HP_p1);
+		p1_hp.setPosition(10, 455);
+		p1_hp.setSize(450, 40);
+		p1_hp.setColor(Color.RED);
+
+		HP_p2 = new Texture("red rectangle.png");
+		p2_hp = new Sprite(HP_p2);
+		p2_hp.setPosition(540, 455);
+		p2_hp.setSize(450, 40);
+		p2_hp.setColor(Color.RED);
+
+		vs = manager.get("vs_logo.png");
+		logo = new Sprite(vs);
+		logo.setSize(100, 100);
+		logo.setPosition(500-50, 455-30);
 		Gdx.input.setInputProcessor(this);
-
-
-
-
 	}
 
 	@Override
@@ -135,7 +139,13 @@ public class MyGdxGame extends Game implements InputProcessor {
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 
+//		batch.draw(bar, 0, 450, 1000, 100);
 		obj.draw(batch);
+		black_bar.draw(batch);
+		p2_hp.draw(batch);
+		p1_hp.draw(batch);
+		logo.draw(batch);
+
 		p2.draw(batch);
 		p1.draw(batch);
 		fontcache1.draw(batch);
@@ -149,7 +159,7 @@ public class MyGdxGame extends Game implements InputProcessor {
 	public void dispose () {
 		batch.dispose();
 		manager.dispose();
-		img.dispose();
+		background_image.dispose();
 
 	}
 

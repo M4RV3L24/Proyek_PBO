@@ -13,7 +13,7 @@ public class Player1{
     }
 
     Double HP = 100.0;
-    double dmg = 5.0;
+    double dmg = 10.0;
 
     float stateTime = 0.0f;
     float x, y;
@@ -41,14 +41,10 @@ public class Player1{
         HITTED
     }
 
-
-
     Animation<TextureRegion> idleLeftAnimation, runLeftAnimation, idleRightAnimation, runRightAnimation, runRightJump, runLeftJump, runRightAttack, runLeftAttack,
             runRightDeath, runLeftDeath, runRightHitted, runLeftHitted, runLeftFall, runRightFall;
 
     MyGdxGame app;
-
-
 
     public void generatePlayerAnimation()
     {
@@ -146,6 +142,7 @@ public class Player1{
                     if (app.p1.canHit(app.p2)) {
                         app.p2.setHP(app.p2.getHP()-app.p1.getDmg());
                         app.fontcache2.setText(String.format("Player 2 HP: %.2f",app.p2.getHP()), 655, 500);
+                        app.p2_hp.setSize((float) (450 * app.p2.getHP()/100.0), app.p2_hp.getHeight());
                         app.p2.doAction(Player2.Action.HITTED);
 
                     }
@@ -159,6 +156,7 @@ public class Player1{
                     if (app.p1.canHit(app.p2)) {
                         app.p2.setHP(app.p2.getHP()-app.p1.getDmg());
                         app.fontcache2.setText(String.format("Player 2 HP: %.2f",app.p2.getHP()), 655, 500);
+                        app.p2_hp.setSize((float) (450*app.p2.getHP()/100.0), app.p2_hp.getHeight());
                         app.p2.doAction(Player2.Action.HITTED);
                     }
                     doAction(Action.NO_ATTACK);
